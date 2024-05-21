@@ -6,7 +6,9 @@ import CursosList from './views/CursosList.vue'
 
 <template>
   <div>
-    <Cursos />
+    <!-- Para probar estos dos elementos intercambiar por favor -->
+    <!-- <Cursos />  -->
+    <CursosList />
   </div>
 </template>
 
