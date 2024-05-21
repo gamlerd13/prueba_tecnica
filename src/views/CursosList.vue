@@ -1,37 +1,53 @@
 <template>
-    <div class="container mx-auto mt-10 text-black">
-        <h2 class=" text-2xl font-bold mb-6">Actualizar Cursos</h2>
-        <table class="min-w-full bg-white border border-gray-200">
-            <thead>
-                <tr class="bg-gray-200">
-                    <th class="py-2 px-4 border-b">Nombre</th>
-                    <th class="py-2 px-4 border-b">Categoría</th>
-                    <th class="py-2 px-4 border-b">Descripción</th>
-                    <th class="py-2 px-4 border-b">Cantidad Alumnos</th>
-                    <th class="py-2 px-4 border-b">Inicio</th>
-                    <th class="py-2 px-4 border-b">Fin</th>
-                    <th class="py-2 px-4 border-b">Precio</th>
-                    <th class="py-2 px-4 border-b">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="curso in cursos" :key="curso.id" class="border-b">
-                    <td class="py-2 px-4">{{ curso.nombre }}</td>
-                    <td class="py-2 px-4">{{ curso.categoria }}</td>
-                    <td class="py-2 px-4">{{ curso.descripcion }}</td>
-                    <td class="py-2 px-4">{{ curso.cantidadAlumnos }}</td>
-                    <td class="py-2 px-4">{{ curso.inicio }}</td>
-                    <td class="py-2 px-4">{{ curso.fin }}</td>
-                    <td class="py-2 px-4">{{ curso.precio }}</td>
-                    <td class="py-2 px-4">
-                        <button @click="editCurso(curso)"
-                            class="bg-blue-500 text-white px-3 py-1 rounded">Editar</button>
-                        <button @click="deleteCurso(curso.id)"
-                            class="bg-red-500 text-white px-3 py-1 rounded ml-2">Eliminar</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+
+    <div class="flex flex-col">
+
+        <div v-if="mensaje" class="{{ mensaje.tipo }}">
+            <h3 class="{{ mensaje.tipo }}">{{ mensaje.mensaje }}</h3>
+        </div>
+        <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+                <div class="overflow-hidden">
+                    <table class="min-w-full text-left text-sm font-light text-surface dark:text-white">
+                        <thead class="border-b border-neutral-200 font-medium dark:border-white/10">
+                            <tr>
+                                <th scope="col" class="px-6 py-4">#id</th>
+                                <th scope="col" class="px-6 py-4">Nombre</th>
+                                <th scope="col" class="px-6 py-4">Categoría</th>
+                                <th scope="col" class="px-6 py-4">Descripción</th>
+                                <th scope="col" class="px-6 py-4">Cantidad</th>
+                                <th scope="col" class="px-6 py-4">Inicio</th>
+                                <th scope="col" class="px-6 py-4">Fin</th>
+                                <th scope="col" class="px-6 py-4">Precio</th>
+                                <th scope="col" class="px-6 py-4">Alumnos</th>
+                                <th scope="col" class="px-6 py-4">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="curso in cursos" :key="curso.id"
+                                class="border-b border-neutral-200 dark:border-white/10">
+                                <td class="wrap px-6 py-4 font-medium">{{ curso.id }}</td>
+                                <td class="wrap px-6 py-4">{{ curso.nombre }}</td>
+                                <td class="wrap px-6 py-4">{{ curso.categoria }}</td>
+                                <td class="wrap px-6 py-4">{{ curso.descripcion }}</td>
+                                <td class="whitespace-nowrap px-6 py-4">{{ curso.cantidadAlumnos }}</td>
+                                <td class="whitespace-nowrap px-6 py-4">{{ curso.inicio }}</td>
+                                <td class="whitespace-nowrap px-6 py-4">{{ curso.fin }}</td>
+                                <td class="whitespace-nowrap px-6 py-4">{{ curso.precio }}</td>
+                                <td class="wrap px-6 py-4">{{ curso.alumnos }}</td>
+                                <td class="whitespace-nowrap px-6 py-4">
+                                    <button @click="editCurso(curso)"
+                                        class="bg-blue-500 text-white px-3 py-1 rounded">Editar</button>
+                                    <button @click="deleteCurso(curso.id)"
+                                        class="bg-red-500 text-white px-3 py-1 rounded ml-2">Eliminar</button>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -41,18 +57,44 @@ import { useRouter } from 'vue-router';
 import axios from 'axios';
 
 const cursos = ref([]);
+const mensaje = ref("");
 const router = useRouter();
+
+
+const arrayToStringAlunos = (curso_alumnos) => {
+    curso_alumnos.map(e => {
+        if (e) {
+            return e.alumno.nombres
+        }
+        else {
+            return e
+        }
+    }).toString()
+}
 
 
 const fetchCursos = async () => {
     try {
         const response = await axios.get(`${import.meta.env.VITE_API_URL}/cursos`);
-        let data = response.data
-        data = data.map((curso) => {
-            if (typeof curso.categoria == "string") {
-                return curso.categoria = curso.categoria.split(" ")
+        let data = response.data.map((curso) => {
+            if (Array.isArray(curso.categoria)) {
+                return {
+                    ...curso,
+                    categoria: curso.categoria.toString(),
+                    alumnos: arrayToStringAlunos(curso.alumnos)
+                };
             } else {
-                return curso
+                return {
+                    ...curso,
+                    alumnos: curso.alumnos.map(e => {
+                        if (e) {
+                            return e.alumno.nombres
+                        }
+                        else {
+                            return e
+                        }
+                    }).toString()
+                }
             }
         })
         cursos.value = data;
@@ -64,18 +106,31 @@ const fetchCursos = async () => {
 
 
 const editCurso = (curso) => {
-    router.push(`/cursos/${curso.id}`);
+    router.push(`/curso/${curso.id}/edit`);
 };
 
+// mensaje
 
+const mostrarMensaje = () => {
+    setTimeout(() => {
+        mensaje.value = "";
+    }, 3000);
+};
 // logica para eliminar curso
 const deleteCurso = async (id) => {
+
     try {
         await axios.delete(`${import.meta.env.VITE_API_URL}/cursos/${id}`);
         cursos.value = cursos.value.filter(curso => curso.id !== id);
-        console.log(` Se elimino el curso con id ${id} `)
+
+        let renderMensaje = { mensaje: `El curso con id ${id} se eliminó exitosamente`, color: "bg-green-600" }
+        mensaje.value = renderMensaje
+        mostrarMensaje(renderMensaje)
+
     } catch (error) {
-        console.error('Error al eliminar el curso:', error);
+        let renderMensaje = { mensaje: "Error al crear curso", tipo: "bg-rose-600" }
+        mensaje.value = renderMensaje
+        mostrarMensaje(renderMensaje)
     }
 };
 

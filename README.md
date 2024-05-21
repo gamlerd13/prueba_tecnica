@@ -6,5 +6,14 @@ This template should help get you started developing with Vue 3 in Vite. The tem
 
 - [VS Code](https://code.visualstudio.com/) + [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (previously Volar) and disable Vetur
 
-Librerias:
-vue3-datepicker
+## Usage
+
+0. execute npm install to download the dependencies
+
+1. Rename the .env.example file to .env to use environment variable
+
+## Agradecimentos
+
+> Gracias por la entrevista equipo de inlearning
+
+## Pictures
